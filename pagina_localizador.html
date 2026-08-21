@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<!-- Declara el esquema para lo que pinta el navegador y no la hoja de
+     estilos: barras de desplazamiento, controles de formulario, y el
+     primer pintado si el CSS tarda o falla. -->
+<title>¿Dónde queda mi inmueble? Búsquelo por su número posicional · Agrimensura.com.do</title>
+<meta name="description" content="Escriba el número posicional de su inmueble y le decimos dónde queda: se lo enseñamos sobre la foto aérea y puede abrir la ruta en Google Maps o en Waze. Gratis, sin registro. Datos del Registro Inmobiliario.">
+<link rel="canonical" href="https://localizador.agrimensura.com.do/">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="¿Dónde queda mi inmueble?">
+<meta property="og:description" content="Escriba el número posicional y le enseñamos el inmueble sobre la foto aérea, con la ruta lista para Google Maps o Waze. Gratis y sin registro.">
+<meta property="og:url" content="https://localizador.agrimensura.com.do/">
+<meta property="og:locale" content="es_DO">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  /* Manual de marca de Agrimensura.com.do. Mismos valores que el catálogo:
+     las dos páginas se recorren seguidas y deben leerse como una sola marca. */
+  :root {
+    --azul: #126493;
+    --gris: #59595B;
+    /* Medido, no elegido a ojo: el #7a7a7c anterior daba 4.28:1 sobre blanco y
+       no llegaba al 4.5:1 que pide la WCAG AA. Este pasa en las dos superficies
+       del sistema (5.09:1 sobre blanco, 4.74:1 sobre el fondo gris). */
+    --gris-suave: #6e6e70;
+    --blanco: #FFFFFF;
+    --borde: #e3e7ea;
+    --fondo: #f5f7f9;
+    --rojo: #C1272D;
+    --rojo-fondo: #FDF4F4;
+    --rojo-texto: #4a3234;
+    --verde: #1B7F3B;
+  }
+  /* La propiedad, además del <meta>: el meta declara lo que la página
+     soporta y ésta es la que se puede leer para comprobar que sigue puesta. */
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--fondo); color: var(--gris);
+    font-family: "Open Sans", "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+  .contenedor { max-width: 1120px; margin: 0 auto; padding: 0 1.25rem; }
+
+  header { background: var(--blanco); border-bottom: 1px solid var(--borde); }
+  .barra { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .marca { display: inline-block; padding: 1rem 0; line-height: 0; }
+  .marca .logo { height: 34px; width: auto; display: block; }
+  .volver { font-size: .9rem; color: var(--gris-suave); text-decoration: none; }
+  .volver:hover { color: var(--azul); text-decoration: underline; }
+
+  .hero { background: var(--blanco); padding: 2.75rem 0 3rem; text-align: center; }
+  .hero h1 {
+    font-family: Montserrat, sans-serif; font-weight: 700;
+    font-size: clamp(1.65rem, 4vw, 2.35rem); color: var(--azul);
+    margin: 0 0 .9rem; line-height: 1.22;
+  }
+  .hero p { max-width: 46rem; margin: 0 auto; font-size: 1.05rem; }
+  .distintivos { margin-top: 1.4rem; display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; }
+  .distintivo {
+    padding: .35rem .85rem; background: #eef4f9; color: var(--azul);
+    border-radius: 999px; font-size: .84rem; font-weight: 600;
+  }
+  /* El distintivo de gratis va en verde y el primero. Esta herramienta se dirige
+     a alguien que no es cliente del hub y que llega desde una búsqueda: lo
+     primero que necesita saber es que no le van a cobrar ni pedir una cuenta. */
+  .distintivo.gratis { background: var(--verde); color: var(--blanco); }
+
+  .boton-ir {
+    display: inline-block; margin-top: 1.5rem; padding: .75rem 1.6rem;
+    background: var(--azul); color: var(--blanco); border-radius: 4px;
+    text-decoration: none; font-family: Montserrat, sans-serif;
+    font-weight: 600; font-size: 1rem;
+  }
+  .boton-ir:hover { background: #0e4e73; }
+
+  .seccion-app { padding: 2.5rem 0 3rem; }
+
+  h2 {
+    font-family: Montserrat, sans-serif; font-weight: 600;
+    font-size: 1.3rem; color: var(--gris); margin: 0 0 1.1rem;
+  }
+
+  /* El aviso central, en rojo y arriba del todo. Aquí tiene un peso distinto que
+     en las demás herramientas del hub: quien llega no es agrimensor, puede estar
+     a punto de comprar un terreno, y podría tomar esta pantalla por una
+     comprobación suficiente. No lo es. */
+  .aviso {
+    background: var(--rojo-fondo); border-left: 4px solid var(--rojo);
+    border-radius: 6px; padding: 1.1rem 1.3rem; margin: 0 0 2rem;
+    color: var(--rojo-texto); font-size: .96rem;
+  }
+  .aviso strong { color: #7a2226; }
+  .aviso a { color: var(--azul); }
+  .aviso p { margin: 0 0 .6rem; }
+  .aviso p:last-child { margin-bottom: 0; }
+
+  .guia {
+    background: var(--blanco); border: 1px solid var(--borde);
+    border-radius: 6px; padding: 1.3rem 1.4rem .4rem; margin: 0 0 2rem;
+  }
+  .guia h3 {
+    font-family: Montserrat, sans-serif; font-weight: 600; font-size: 1.02rem;
+    color: var(--azul); margin: 0 0 .4rem;
+  }
+  .guia h3 + p, .guia h3 + ul { margin-top: 0; }
+  .guia p { font-size: .95rem; margin: 0 0 1.3rem; }
+  .guia > *:last-child { margin-bottom: 1rem; }
+
+  .lista-no { margin: 0 0 1.3rem; padding: 0; list-style: none; }
+  .lista-no li {
+    position: relative; padding-left: 1.5rem; margin-bottom: .55rem;
+    font-size: .95rem;
+  }
+  /* Una raya y no una cruz roja: son límites declarados, no fallos. El texto
+     dice «no» en todas, así que el signo no carga con el significado él solo. */
+  .lista-no li::before {
+    content: "—"; position: absolute; left: 0; top: 0;
+    color: var(--gris-suave); font-weight: 700;
+  }
+
+  /* Instrucciones. Van ANTES del marco, no dentro: la app se sirve desde otro
+     dominio y tarda unos segundos en cargar; mientras tanto, esto es lo único
+     que le dice al visitante qué va a poder hacer. Son DOS y no cuatro, porque
+     la herramienta es un campo y un botón. */
+  .instrucciones {
+    display: grid; gap: 1rem; margin: 0 0 1.5rem; padding: 0;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    list-style: none; counter-reset: paso;
+  }
+  .instrucciones li {
+    position: relative; padding: .9rem 1rem .9rem 3rem;
+    background: var(--blanco); border: 1px solid var(--borde);
+    border-radius: 6px; font-size: .92rem;
+  }
+  .instrucciones li::before {
+    counter-increment: paso; content: counter(paso);
+    position: absolute; left: .9rem; top: .85rem;
+    width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    background: var(--azul); color: var(--blanco);
+    font-family: Montserrat, sans-serif; font-weight: 700; font-size: .85rem;
+    display: grid; place-items: center;
+  }
+  .instrucciones strong { color: var(--azul); }
+
+  /* Dónde encontrar el número. Es la pregunta que va a hacerse la mitad de la
+     gente que llegue, y si no está resuelta antes del marco, se van. */
+  .donde-esta {
+    background: #eef4f9; border-left: 4px solid var(--azul);
+    border-radius: 6px; padding: 1.1rem 1.3rem; margin: 0 0 2rem;
+    font-size: .95rem;
+  }
+  .donde-esta p { margin: 0 0 .6rem; }
+  .donde-esta p:last-child { margin-bottom: 0; }
+  .donde-esta code {
+    font-family: Consolas, "Courier New", monospace;
+    background: var(--blanco); padding: .1rem .4rem; border-radius: 3px;
+    border: 1px solid var(--borde);
+  }
+
+  .marco {
+    background: var(--blanco); border: 1px solid var(--borde);
+    border-radius: 6px; overflow: hidden;
+  }
+  /* La altura la dice la propia aplicación, no este CSS. Un iframe entre
+     dominios distintos no puede medirse desde fuera —`contentDocument` lanza
+     `TypeError`—, así que aquí había una cifra escrita a mano y una barra de
+     desplazamiento dentro del marco en cuanto el contenido pasaba de ella.
+     Ahora la herramienta publica su altura con `postMessage` y el guion del
+     final la aplica.
+
+     El número que queda es solo el de partida, para el primer instante y para
+     el caso de que el JavaScript esté apagado.
+
+     MEDIDO el 21/08/2026 en el navegador, con la aplicación incrustada
+     (`?embed=true`) y **con el contador ya pintado** — en local sin cifra la
+     medición sale corta y el marco recorta el día que se publica:
+
+         a 1280 px .... pantalla de partida  975 · con resultado 1891
+         a  375 px .... pantalla de partida 1452
+
+     Se pone la de PARTIDA, que es la que ve todo el que llega, más un respiro.
+     El salto hasta el resultado son 916 px —el mayor del hub, porque la pantalla
+     de partida es un campo y un botón y la de resultado trae un mapa de 460 px,
+     la ficha y los dos botones de ir— y ese salto lo cubre el `postMessage`, no
+     esta cifra. */
+  iframe { display: block; width: 100%; height: 990px; border: 0;
+           transition: height .18s ease; }
+
+  .nota-marco {
+    margin: 0 0 .7rem; font-size: .88rem; color: var(--gris-suave);
+    padding-left: .9rem; border-left: 3px solid var(--borde);
+  }
+
+  .acciones-marco {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap; margin-top: .85rem; font-size: .9rem;
+  }
+  .boton-ampliar {
+    display: inline-block; padding: .55rem 1.1rem;
+    background: var(--azul); color: var(--blanco);
+    border-radius: 4px; text-decoration: none; font-weight: 600;
+  }
+  .boton-ampliar:hover { background: #0e4e73; }
+
+  .seccion-info { background: var(--blanco); border-top: 1px solid var(--borde); padding: 2.75rem 0 3rem; }
+  .info { display: grid; gap: 1.75rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .info h3 {
+    font-family: Montserrat, sans-serif; font-weight: 600; font-size: 1.02rem;
+    color: var(--azul); margin: 0 0 .4rem;
+  }
+  .info p { margin: 0; font-size: .94rem; }
+
+  footer {
+    background: var(--fondo); border-top: 1px solid var(--borde);
+    padding: 2rem 0 2.5rem; font-size: .85rem; color: var(--gris-suave);
+  }
+  footer a { color: var(--azul); }
+  footer p { margin: 0 0 .6rem; max-width: 62rem; }
+
+  @media (max-width: 640px) {
+    /* Medido a 375 px, incrustada y con el contador puesto: 1452 px la pantalla
+       de partida. Ver el comentario del `iframe` de arriba. */
+    iframe { height: 1470px; }
+    .hero { padding: 2rem 0 2.25rem; }
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="contenedor barra">
+    <a class="marca" href="https://www.agrimensura.com.do">
+      <img src="assets/logo.png" alt="Agrimensura.com.do" class="logo">
+    </a>
+    <a class="volver" href="https://herramientas.agrimensura.com.do">← Todas las herramientas</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="contenedor">
+    <h1>¿Dónde queda mi inmueble?</h1>
+    <p>
+      Escriba el <strong>número posicional</strong> que aparece en su documento
+      del Registro Inmobiliario y le decimos en qué municipio está, se lo
+      enseñamos sobre la foto aérea y le dejamos la ruta lista para abrir en
+      Google Maps o en Waze.
+    </p>
+    <div class="distintivos">
+      <span class="distintivo gratis">Gratis, sin registro</span>
+      <span class="distintivo">Datos del Registro Inmobiliario</span>
+      <span class="distintivo">Sobre la foto aérea</span>
+      <span class="distintivo">Ruta en Google Maps o Waze</span>
+      <span class="distintivo">Avisa si el inmueble está anulado</span>
+    </div>
+    <a class="boton-ir" href="#herramienta">Buscar mi inmueble ↓</a>
+  </div>
+</section>
+
+<section class="seccion-app" id="herramienta">
+  <div class="contenedor">
+
+    <div class="aviso">
+      <p>
+        <strong>Esto no es el Registro Inmobiliario y no certifica nada.</strong>
+        Es una herramienta independiente de Agrimdata &amp; Servicios, SRL, que
+        no está afiliada al Registro Inmobiliario ni al Poder Judicial. Lo que
+        ve es una copia de lo que el RI publica en sus geoservicios abiertos,
+        <strong>en el momento en que se consulta</strong>. El portal oficial es
+        <a href="https://servicios.ri.gob.do/ConsultaParcelario" target="_blank" rel="noopener">servicios.ri.gob.do/ConsultaParcelario</a>.
+      </p>
+      <p>
+        <strong>No compre, no venda y no firme nada basándose en esta
+        pantalla.</strong> Pida la certificación oficial del Registro
+        Inmobiliario y contrate a un agrimensor para que le mida el terreno y le
+        señale los linderos en el sitio.
+      </p>
+      <p>
+        Y el punto que le damos <strong>es una referencia para llegar, no un
+        lindero</strong>: le dice a qué terreno ir, no por dónde pasa la línea
+        de su propiedad.
+      </p>
+    </div>
+
+    <h2>¿Dónde está mi número posicional?</h2>
+
+    <div class="donde-esta">
+      <p>
+        Es un número de <strong>doce dígitos</strong>, sin letras ni guiones —del
+        tipo <code>999999000001</code>—. Aparece en la
+        <strong>certificación del estado jurídico del inmueble</strong>, en el
+        <strong>plano de mensura</strong> aprobado y en la documentación que el
+        Registro Inmobiliario emite sobre parcelas resultantes.
+      </p>
+      <p>
+        <strong>No lo confunda con la designación catastral</strong>, que lleva
+        letras y guiones —<code>999-X-1-B-18</code>— ni con el número de
+        expediente. Esos dos se buscan en el
+        <a href="https://parcelario.agrimensura.com.do">Visor Parcelario</a>.
+      </p>
+    </div>
+
+    <h2>Guía de uso</h2>
+
+    <div class="guia">
+      <h3>Qué hace</h3>
+      <p>
+        Busca su número posicional en el parcelario que el Registro Inmobiliario
+        publica abiertamente. Si lo encuentra, le dice
+        <strong>en qué municipio y provincia está</strong> el inmueble, calcula
+        un punto dentro de la parcela, se lo dibuja sobre la
+        <strong>foto aérea</strong> y le ofrece
+        <strong>abrir la ruta hasta allí</strong> en Google Maps o en Waze. Le
+        muestra además la superficie que declara el RI y la fecha en que se
+        inscribió.
+      </p>
+
+      <h3>Cómo lo hace</h3>
+      <p>
+        Consulta el <strong>GeoServer público del Registro Inmobiliario</strong>
+        (<code>atlas.ri.gob.do</code>), que es el mismo del que se sirve su
+        portal oficial. El número viaja allí y nada más: ni quién pregunta, ni
+        desde dónde. La foto aérea la sirve <strong>Esri</strong> y el callejero
+        <strong>CARTO</strong>; esos servidores ven la zona que está mirando,
+        como en cualquier mapa web.
+      </p>
+      <p>
+        <strong>La búsqueda tarda unos diez segundos, y no es su conexión.</strong>
+        El buscador del Registro Inmobiliario es lento cuando se le pregunta por
+        un número: hay que mirar en sus tres listas de parcelas resultantes y la
+        mayor tiene 730 000 registros sin índice. Se consultan las tres a la vez
+        para que tarde lo que la más lenta y no la suma de las tres.
+      </p>
+
+      <h3>Si su inmueble tiene forma irregular, el punto se mueve</h3>
+      <p>
+        El centro geométrico de una parcela en forma de <strong>L</strong> o de
+        <strong>U</strong> cae <strong>fuera de la propia parcela</strong>.
+        Medido sobre parcelas reales del Registro Inmobiliario: ocurre en el
+        <strong>1.2 % de las rurales</strong>, y en el peor caso el centro
+        quedaba a <strong>51 metros del terreno</strong> — en el patio del
+        vecino, o al otro lado de la carretera.
+      </p>
+      <p>
+        Cuando eso pasa, la herramienta <strong>mueve el punto a un lugar que sí
+        está dentro de su parcela y se lo dice en pantalla</strong>. No se
+        esconde: usted tiene que saber si el punto al que va es el centro de su
+        terreno o simplemente un punto interior.
+      </p>
+
+      <h3>Si el inmueble está anulado, se lo decimos</h3>
+      <p>
+        Un número posicional puede corresponder a una parcela resultante que el
+        Registro Inmobiliario <strong>anuló</strong>. Esas se buscan a propósito
+        y se muestran con la advertencia encima, en rojo, porque es justo lo que
+        no se puede descubrir tarde.
+      </p>
+
+      <h3>Qué no hace</h3>
+      <ul class="lista-no">
+        <li><strong>No certifica nada</strong> y no sustituye al documento del
+            Registro Inmobiliario.</li>
+        <li><strong>No le dice dónde están sus linderos.</strong> Le da un punto
+            dentro de la parcela, no sus esquinas. Marcar los linderos en el
+            terreno es un trabajo de campo que hace un agrimensor con equipo, y
+            no se puede hacer desde un mapa.</li>
+        <li><strong>No dice quién es el propietario.</strong> Los geoservicios
+            del RI <strong>no publican titularidad</strong>: no hay nombres, ni
+            cédulas, ni precios. Esta herramienta no puede mostrar lo que no
+            recibe y no lo busca por otro lado.</li>
+        <li><strong>No comprueba cargas ni gravámenes.</strong> Que un inmueble
+            aparezca aquí no dice nada sobre hipotecas, litis, oposiciones ni
+            servidumbres inscritas.</li>
+        <li><strong>No busca por designación catastral ni por expediente.</strong>
+            Solo por número posicional. Los otros dos, en el
+            <a href="https://parcelario.agrimensura.com.do">Visor Parcelario</a>.</li>
+        <li><strong>No entrega archivos.</strong> Aquí no se descarga nada. Si
+            necesita la parcela en DXF, KML o shapefile para llevarla a un
+            programa de dibujo, eso lo hace el
+            <a href="https://parcelario.agrimensura.com.do">Visor Parcelario</a>.</li>
+        <li><strong>No admite listas.</strong> Un número por búsqueda.</li>
+        <li><strong>No guarda su búsqueda</strong> ni el resultado.</li>
+      </ul>
+    </div>
+
+    <h2>Paso a paso</h2>
+    <ol class="instrucciones">
+      <li><strong>Escriba los doce dígitos</strong> del número posicional. Puede
+          pegarlos con espacios o guiones: se limpian solos.</li>
+      <li><strong>Pulse buscar y espere unos diez segundos.</strong> Verá el
+          municipio, el mapa y los botones para ir con Google Maps o Waze.</li>
+    </ol>
+
+    <h2>La herramienta</h2>
+    <p class="nota-marco">
+      La primera carga puede tardar unos segundos, y cada búsqueda unos diez más:
+      el buscador del Registro Inmobiliario es lento cuando se le pregunta por un
+      número. Si su servidor no responde, la herramienta lo dice y no lo confunde
+      con «ese número no existe».
+    </p>
+    <div class="marco">
+      <iframe
+        id="marco-app"
+        src="https://localizador.app.agrimensura.com.do/?embed=true"
+        title="Localizador de inmuebles por posicional"
+        loading="lazy"
+        allow="clipboard-write"
+      ></iframe>
+    </div>
+    <div class="acciones-marco">
+      <span>En el teléfono se trabaja más cómodo a pantalla completa.</span>
+      <a class="boton-ampliar" id="abrir-app"
+         href="https://localizador.app.agrimensura.com.do/"
+         target="_blank" rel="noopener">Abrir a pantalla completa ↗</a>
+    </div>
+  </div>
+</section>
+
+<section class="seccion-info">
+  <div class="contenedor">
+    <h2>Lo que conviene saber</h2>
+    <div class="info">
+
+      <div>
+        <h3>Un punto no es un lindero, y la diferencia cuesta dinero</h3>
+        <p>
+          Llegar al terreno y saber por dónde pasa su línea son dos cosas
+          distintas. Esta herramienta hace la primera. La segunda
+          <strong>solo se resuelve midiendo en el sitio</strong>: un agrimensor
+          con equipo replantea las esquinas y levanta el plano. Colocar una
+          verja guiándose por un mapa es como se empiezan la mayoría de los
+          conflictos con un vecino.
+        </p>
+      </div>
+
+      <div>
+        <h3>Por qué el punto a veces no es el centro</h3>
+        <p>
+          Porque el centro de una figura en L o en U cae fuera de ella. Medido
+          sobre parcelas reales: <strong>0 de 534 en zona urbana</strong>, donde
+          los solares son rectángulos, y <strong>5 de 412 en zona rural</strong>,
+          donde no lo son. En el peor caso el centro quedaba a
+          <strong>51 metros</strong> del terreno. Cuando pasa, la herramienta
+          mueve el punto adentro y lo avisa en pantalla.
+        </p>
+      </div>
+
+      <div>
+        <h3>El RI no publica todos los inmuebles</h3>
+        <p>
+          Si su número no aparece, lo más probable es que sea un dígito mal
+          copiado — son doce y es fácil bailar uno. Pero también puede ser que
+          <strong>el inmueble no esté en el parcelario publicado</strong>: hay
+          huecos, sobre todo en terrenos que nunca pasaron por una mensura
+          moderna. No encontrarlo aquí no significa que no exista ni que su
+          documento no valga.
+        </p>
+      </div>
+
+      <div>
+        <h3>Su búsqueda no sale de aquí</h3>
+        <p>
+          <strong>No se pide correo ni contraseña</strong>, no se crea ningún
+          perfil y no se guarda nada: el número se procesa en memoria y
+          desaparece al cerrar la página. Al Registro Inmobiliario viaja
+          <strong>el número que usted escribió</strong> y nada más. Lo que envía
+          viaja <strong>cifrado</strong> (HTTPS) y se procesa
+          <strong>en la memoria del servidor</strong>, sin escribirse en disco.
+          Al terminar <strong>no queda nada que mirar después — tampoco para
+          nosotros</strong>. Sólo se lleva un conteo del total de búsquedas, sin
+          ningún dato asociado. Si pulsa un botón de ir, Google Maps o Waze
+          reciben las coordenadas — eso ocurre sólo si usted lo pulsa.
+        </p>
+      </div>
+
+      <div>
+        <h3>Depende de un servidor que no es nuestro</h3>
+        <p>
+          Si el servidor del Registro Inmobiliario no responde, esta herramienta
+          tampoco puede. <strong>No hay copia en otro sitio</strong> y no se
+          finge que la haya: se dice de quién es el problema, se ofrece el portal
+          oficial y no se insiste en bucle sobre un servicio que acaba de fallar.
+        </p>
+      </div>
+
+      <div>
+        <h3>¿Y si lo que tengo es otro número?</h3>
+        <p>
+          La <strong>designación catastral</strong> lleva letras y guiones
+          (<code>999-X-1-B-18</code>) y es la del parcelario antiguo. El
+          <strong>número de expediente</strong> identifica el trámite, no el
+          inmueble. Los dos se buscan en el
+          <a href="https://parcelario.agrimensura.com.do">Visor Parcelario</a>,
+          que además le entrega la parcela en DXF, KML y shapefile con su cuadro
+          de coordenadas.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="contenedor">
+    <p>
+      Herramienta <strong>gratuita</strong> de <strong>Agrimdata &amp;
+      Servicios, SRL</strong>. Los datos del parcelario son del
+      <a href="https://ri.gob.do" target="_blank" rel="noopener">Registro
+      Inmobiliario de la República Dominicana</a> y se consultan en vivo en sus
+      geoservicios públicos; los derechos sobre esa información son suyos. Esta
+      página <strong>no certifica nada</strong>: para cualquier trámite hace
+      falta el documento que emite el Registro Inmobiliario. El punto que se
+      muestra es una referencia para llegar y <strong>no delimita la
+      propiedad</strong>. Calcula dentro de WGS84 y no realiza transformación de
+      datum. No constituye asesoría técnica, legal ni certificación de ningún
+      tipo.
+    </p>
+    <p>
+      Producto independiente. <strong>No está afiliado, patrocinado ni avalado
+      por el Registro Inmobiliario ni por el Poder Judicial de la República
+      Dominicana.</strong> El fondo del mapa lo sirven Esri y CARTO, con datos de
+      <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>.
+      Google Maps y Waze son marcas de sus respectivos titulares y no están
+      asociadas a este producto.
+    </p>
+    <p>
+      <a href="https://herramientas.agrimensura.com.do">Todas las herramientas</a>
+      · <a href="https://www.agrimensura.com.do">www.agrimensura.com.do</a>
+      · 849-537-3857
+    </p>
+  </div>
+</footer>
+
+
+<script>
+  // Contador de visitas de esta pagina. Alimenta la cifra acumulada del
+  // catalogo, que suma las visitas de todas las herramientas.
+  //
+  // Si el servicio no responde, no pasa nada: la pagina funciona igual.
+  fetch('https://countapi.mileshilliard.com/api/v1/hit/agrimensura-localizador-pagevisits').catch(() => {});
+</script>
+
+<script>
+  /* El marco se ajusta a lo que mide la herramienta.
+
+     La aplicación publica su altura con `postMessage` cada vez que su contenido
+     cambia (ver `nucleo/marco.py`); aquí solo se escucha y se aplica. La altura
+     del CSS es solo el punto de partida.
+
+     Se comprueba el origen: `postMessage` lo recibe cualquiera, y sin esa
+     comprobación otra página incrustada podría estirar este marco a su gusto. */
+  (function () {
+    // UN solo remitente, y eso es correcto **porque esta herramienta es
+    // gratuita**. En las PRO hacen falta dos: quien llega sin sesión no ve la
+    // herramienta dentro del marco sino la invitación a suscribirse, y esa la
+    // sirve `acceso.app`. Aquí no hay portero, así que el único que puede hablar
+    // es la propia aplicación — y añadir el segundo origen sería declarar que
+    // existe un portero que no existe.
+    var ORIGENES = ['https://localizador.app.agrimensura.com.do'];
+    var TOPE = 8000;
+    var marco = document.getElementById('marco-app');
+    if (!marco) { return; }
+    window.addEventListener('message', function (e) {
+      if (ORIGENES.indexOf(e.origin) === -1) { return; }
+      var d = e.data;
+      if (!d || d.tipo !== 'agrimensura:alto') { return; }
+      var alto = parseInt(d.alto, 10);
+      if (!(alto > 200 && alto < TOPE)) { return; }
+      marco.style.height = alto + 'px';
+    });
+  })();
+</script>
+</body>
+</html>

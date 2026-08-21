@@ -1,0 +1,24 @@
+[theme]
+# Manual de marca de Agrimensura.com.do
+primaryColor = "#126493"          # azul institucional
+backgroundColor = "#FFFFFF"       # blanco obligatorio de fondo
+secondaryBackgroundColor = "#F4F8FB"
+textColor = "#59595B"             # gris pizarra
+font = "sans serif"
+
+[browser]
+gatherUsageStats = false
+
+[client]
+# El usuario no debe ver trazas de Python si algo falla: es una herramienta
+# pública, y un stack trace no le dice nada y sí expone la implementación.
+showErrorDetails = false
+
+[server]
+# Esta herramienta NO recibe archivos: la entrada es un número de doce dígitos.
+# El tope se deja igualmente en el mínimo razonable porque Streamlit acepta
+# subidas aunque la aplicación no las pida, y el valor por defecto son 200 MB por
+# archivo — lo que un visitante cualquiera podría meter en la memoria de este
+# contenedor con un solo clic. Las treinta y tantas herramientas del hub
+# comparten un servidor de 8 GB.
+maxUploadSize = 1

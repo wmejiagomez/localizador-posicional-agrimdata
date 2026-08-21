@@ -1,0 +1,25 @@
+# El pliego se queda fuera del repositorio: la cara pública es el README.
+PLIEGO.md
+
+# Lo que Python deja por el camino.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+venv/
+.venv/
+
+# Capturas y mediciones de una sesión. Sirven mientras se trabaja y no son parte
+# de la herramienta.
+/capturas/
+/mediciones/
+
+# NUNCA en el repositorio: cualquier archivo con un posicional, un expediente o
+# una designación de un inmueble real. Los fixtures de esta herramienta son
+# SINTÉTICOS —la forma exacta del servidor con identificadores inventados—, y la
+# respuesta cruda del RI trae identificadores de inmuebles de verdad.
+#
+# El repositorio es público, así que esto no tiene marcha atrás: una fuga no se
+# deshace cambiando la visibilidad después.
+*.respuesta.json
+/datos/crudo/
+Posicional*.xlsx

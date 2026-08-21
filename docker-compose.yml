@@ -1,0 +1,83 @@
+# Cómo corre esta herramienta en el servidor: la aplicación y su vitrina.
+#
+# **No la gestiona Coolify, y es a propósito.** Las trece primeras sí, y por eso
+# arrastran un problema que aquí no existe: Coolify guarda sus etiquetas de
+# Traefik codificadas en base64 y al desplegar las vuelca sin decodificar, así que
+# el contenedor nace sin ninguna `traefik.*` y el dominio devuelve 503 con el
+# contenedor sano. Hay que arreglarlo a mano después de cada despliegue.
+#
+# Escribiendo las etiquetas aquí, eso se resuelve solo y queda versionado.
+#
+# Se despliega con `_publicar/desplegar_compose.py localizador`.
+
+services:
+  # ---------------------------------------------------------- la aplicación --
+  app:
+    build: .
+    image: localizador-app:local
+    container_name: localizador-app
+    restart: unless-stopped
+    networks:
+      - coolify
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - traefik.http.routers.localizador-app-http.entryPoints=http
+      - traefik.http.routers.localizador-app-http.rule=Host(`localizador.app.agrimensura.com.do`)
+      - traefik.http.routers.localizador-app-http.middlewares=redirect-to-https
+      - traefik.http.routers.localizador-app-http.service=localizador-app
+      - traefik.http.routers.localizador-app-https.entryPoints=https
+      - traefik.http.routers.localizador-app-https.rule=Host(`localizador.app.agrimensura.com.do`)
+      # **SIN `acceso-pro@file`: esta herramienta es GRATUITA.**
+      #
+      # Los dos errores posibles aquí son graves y ninguno da síntoma. Poner el
+      # portero le pediría una cuenta a un público que no la tiene y no tiene
+      # por qué tenerla —el dueño de un inmueble buscando su terreno—, y la
+      # herramienta parecería rota sin estarlo. Quitárselo a una PRO la dejaría
+      # abierta a todo el mundo.
+      #
+      # Por eso `desplegar_compose.py` exige que ésta conteste **200** y no 302,
+      # y por eso `herramientas.json` declara `portero: false`:
+      # `prueba_marcos.py` compara lo declarado con lo real en los dos sentidos.
+      - traefik.http.routers.localizador-app-https.middlewares=gzip
+      - traefik.http.routers.localizador-app-https.service=localizador-app
+      - traefik.http.routers.localizador-app-https.tls=true
+      - traefik.http.routers.localizador-app-https.tls.certresolver=letsencrypt
+      - traefik.http.services.localizador-app.loadbalancer.server.port=8501
+      # Los dos intermediarios que Coolify define por etiquetas en cada
+      # contenedor suyo. Se repiten aquí porque si algún día éste fuera el único
+      # contenedor en pie, sin estas dos líneas los nombres no existirían y sus
+      # routers no arrancarían.
+      - traefik.http.middlewares.gzip.compress=true
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+
+  # -------------------------------------------------------------- la vitrina --
+  # La zona tiene un comodín que manda a este servidor todo lo que no tenga
+  # registro propio, así que una vitrina nueva no necesita subdominio en cPanel,
+  # ni cuenta de FTP, ni contraseña. Y se queda sin el microcaché del
+  # alojamiento, que sirve la copia anterior durante horas tras publicar.
+  sitio:
+    build: ./sitio
+    image: localizador-sitio:local
+    container_name: localizador-sitio
+    restart: unless-stopped
+    networks:
+      - coolify
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - traefik.http.routers.localizador-sitio-http.entryPoints=http
+      - traefik.http.routers.localizador-sitio-http.rule=Host(`localizador.agrimensura.com.do`)
+      - traefik.http.routers.localizador-sitio-http.middlewares=redirect-to-https
+      - traefik.http.routers.localizador-sitio-http.service=localizador-sitio
+      - traefik.http.routers.localizador-sitio-https.entryPoints=https
+      - traefik.http.routers.localizador-sitio-https.rule=Host(`localizador.agrimensura.com.do`)
+      - traefik.http.routers.localizador-sitio-https.middlewares=gzip
+      - traefik.http.routers.localizador-sitio-https.service=localizador-sitio
+      - traefik.http.routers.localizador-sitio-https.tls=true
+      - traefik.http.routers.localizador-sitio-https.tls.certresolver=letsencrypt
+      - traefik.http.services.localizador-sitio.loadbalancer.server.port=80
+
+networks:
+  coolify:
+    external: true
