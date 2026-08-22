@@ -68,11 +68,20 @@ def con_millares(valor, decimales=0):
 
 def pie_de_pagina():
     """El cierre de la página. Se llama desde cada salida, incluidas las cortas."""
+    # El llamado a la acción por WhatsApp va SIEMPRE, incrustada o no. Antes
+    # se ocultaba entera junto con el aviso legal, dando por hecho que la
+    # página que la rodea ya traía su propio botón — medido el 2026-08-21 y
+    # es falso, así que quien entra por el catálogo, que es casi todo el
+    # mundo, nunca veía este botón. Werner lo pidió el 2026-08-21.
+    #
+    # El aviso legal completo SÍ se sigue ocultando incrustada: es el bloque
+    # largo que a 375 px de ancho obliga a desplazar por dentro del marco. El
+    # botón, corto, no tiene ese costo.
+    st.divider()
+    st.subheader(marca.CTA_TITULO)
+    st.markdown(marca.CTA_TEXTO)
+    st.link_button(marca.CTA_BOTON, marca.CTA_ENLACE)
     if not INCRUSTADA:
-        st.divider()
-        st.subheader(marca.CTA_TITULO)
-        st.markdown(marca.CTA_TEXTO)
-        st.link_button(marca.CTA_BOTON, marca.CTA_ENLACE)
         with st.expander("Aviso legal, privacidad y alcance"):
             st.markdown(marca.DESCARGO_LEGAL)
     st.markdown('<p class="pie">%s</p>' % marca.AVISO_PIE,
