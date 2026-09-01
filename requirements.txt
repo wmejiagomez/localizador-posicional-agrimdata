@@ -9,7 +9,7 @@
 
 streamlit==1.61.0
 pyproj==3.7.2
-requests==2.31.0
+requests==2.34.2
 
 # El mapa. Aquí el mapa no recibe nada del usuario —no se dibuja, no se pincha—,
 # así que bastaría con `pydeck`, que ya viene dentro de Streamlit. Se usa folium
