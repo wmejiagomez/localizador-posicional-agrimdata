@@ -19,6 +19,7 @@ Ningún número posicional viaja hacia este servicio: solo se le pide «sumá un
 herramienta no guarde nada de lo que se consulta.
 """
 
+import os
 import threading
 
 import requests
@@ -54,6 +55,24 @@ def _sumar_en_hilo(cantidad):
                 break  # el servicio no responde; insistir no cambia eso
 
 
+def en_pruebas():
+    """¿Esta copia debe dejar el contador público en paz?
+
+    El contenedor de local usa la MISMA clave que el de producción —está
+    escrita aquí, no en el entorno—, así que cada prueba sube la cifra que ven
+    los visitantes del catálogo, y el síntoma —un número un poco más alto— no
+    se distingue de la verdad.
+
+    Se enciende con `AGRIM_SIN_CONTADOR=1`, el mismo nombre en todo el hub: con
+    uno por herramienta habría que acordarse de tantas variables como
+    contenedores se levanten. La imagen de producción no la lleva, así que lo
+    normal sigue siendo contar: apagado por defecto y nunca al revés —un
+    cerrojo puesto de fábrica dejaría de contar en silencio y la herramienta
+    parecería muerta—.
+    """
+    return os.environ.get("AGRIM_SIN_CONTADOR", "").strip() not in ("", "0")
+
+
 def sumar(cantidad):
     """Suma `cantidad` al contador. No bloquea: corre en segundo plano.
 
@@ -65,7 +84,7 @@ def sumar(cantidad):
     la aplicación llamaba `sumar()` sin argumento: la batería entera pasaba y el
     usuario veía la pantalla roja. Un doble así no prueba, tapa.
     """
-    if cantidad <= 0:
+    if cantidad <= 0 or en_pruebas():
         return
     threading.Thread(target=_sumar_en_hilo, args=(cantidad,),
                      daemon=True).start()
