@@ -4,7 +4,7 @@
 # hub —pyproj, shapely, PyMuPDF— tardan en publicarse para cada versión nueva, y
 # sin rueda el despliegue se pone a compilar C durante minutos, o falla. 3.12 las
 # tiene todas.
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 # Sin esto, Python escribe .pyc dentro del contenedor y no vacía la salida hasta
 # cerrar, con lo que los registros aparecen en blanco justo cuando hacen falta
