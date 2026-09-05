@@ -36,7 +36,7 @@ ES_PRO = False
 SITIO_NOMBRE = "Agrimensura.com.do"
 SITIO_WEB = "https://www.agrimensura.com.do"
 EMPRESA = "Agrimdata & Servicios, SRL"
-TELEFONO = "849-537-3857"
+TELEFONO = "829-472-3857"
 
 # Manual de marca de Agrimensura.com.do.
 AZUL = "#126493"        # azul institucional
@@ -155,7 +155,7 @@ Escríbanos por WhatsApp y le decimos cómo se hace y qué cuesta.
 CTA_BOTON = "Escribir por WhatsApp"
 
 # wa.me pide el número en formato internacional sin signos. República Dominicana
-# es +1, así que 849-537-3857 queda como 1 849 537 3857.
+# es +1, así que 829-472-3857 queda como 1 829 472 3857.
 _WHATSAPP_NUMERO = "1" + TELEFONO.replace("-", "")
 _WHATSAPP_MENSAJE = (
     "Hola, localicé mi inmueble en el buscador de posicionales de "
