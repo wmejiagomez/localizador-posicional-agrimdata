@@ -17,6 +17,12 @@
 <meta property="og:description" content="Escriba el número posicional y le enseñamos el inmueble sobre la foto aérea, con la ruta lista para Google Maps o Waze. Gratis y sin registro.">
 <meta property="og:url" content="https://localizador.agrimensura.com.do/">
 <meta property="og:locale" content="es_DO">
+<!-- tarjeta al compartir · la genera _publicar/tarjetas_og.py -->
+<meta property="og:image" content="https://localizador.agrimensura.com.do/assets/tarjeta-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="¿Dónde queda mi inmueble?">
+<meta name="twitter:card" content="summary_large_image">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -234,6 +240,30 @@
     .hero { padding: 2rem 0 2.25rem; }
   }
 </style>
+<!-- datos estructurados · los genera _publicar/seo_hub.py -->
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "WebApplication",
+ "name": "¿Dónde queda mi inmueble?",
+ "description": "Escriba el número posicional y le enseñamos el inmueble sobre la foto aérea, con la ruta lista para Google Maps o Waze. Gratis y sin registro.",
+ "url": "https://localizador.agrimensura.com.do/",
+ "applicationCategory": "BusinessApplication",
+ "operatingSystem": "Cualquiera con navegador",
+ "inLanguage": "es-DO",
+ "isAccessibleForFree": true,
+ "offers": {
+  "@type": "Offer",
+  "price": "0",
+  "priceCurrency": "USD"
+ },
+ "provider": {
+  "@type": "Organization",
+  "name": "Agrimensura.com.do",
+  "url": "https://www.agrimensura.com.do/"
+ }
+}
+</script>
 </head>
 
 <body>

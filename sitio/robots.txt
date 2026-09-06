@@ -1,0 +1,8 @@
+# Vitrina de una herramienta del hub de Agrimensura.com.do.
+# La línea Sitemap autoriza a que el sitemap del hub nombre esta dirección:
+# sin ella, Google acepta a medias una referencia cruzada entre subdominios y
+# no dice por qué.
+User-agent: *
+Allow: /
+
+Sitemap: https://herramientas.agrimensura.com.do/sitemap.xml
