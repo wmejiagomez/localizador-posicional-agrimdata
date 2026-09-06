@@ -14,6 +14,13 @@ FROM nginx:alpine
 COPY index.html /usr/share/nginx/html/index.html
 COPY assets /usr/share/nginx/html/assets
 
+# El `robots.txt` lleva la línea `Sitemap:` del hub, que es lo que
+# autoriza a que el sitemap de herramientas.agrimensura.com.do nombre
+# esta dirección. Se añade el 2026-09-06: estaba en el repositorio y daba
+# 404 en producción, porque este Dockerfile copiaba la página y los
+# assets y nada más.
+COPY robots.txt /usr/share/nginx/html/robots.txt
+
 # Una página estática no necesita nada más. El `healthcheck` va aquí y no en el
 # compose para que valga igual si algún día se levanta a mano.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
