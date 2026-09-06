@@ -264,6 +264,98 @@
  }
 }
 </script>
+<!-- RETOQUE · lo pone _publicar/mejorar_vitrinas.py -->
+<style>
+/* =====================================================================
+   Retoque común de las 39 vitrinas, injertado por
+   _publicar/mejorar_vitrinas.py.
+
+   No cambia la estructura ni un solo texto: sólo cómo se lee y cómo se
+   mueve. Todo va sobre las clases que ya existen en las 39 —`hero`,
+   `marco`, `seccion-app`, `seccion-info`, `barra`— y sobre las variables
+   de marca que cada una ya declara en su `:root`.
+
+   Los colores salen del manual: azul institucional #126493 y gris
+   pizarra #59595B. Aquí no se inventa ninguno.
+   ===================================================================== */
+
+/* ---- Lo que más cambia: dejar de centrar los párrafos largos --------
+   En un teléfono, un párrafo de siete líneas centrado obliga a buscar
+   dónde empieza cada una. Medido en `superficies`: el texto del hero
+   ocupa siete líneas a 390 px de ancho. El TITULAR se queda centrado
+   —una o dos líneas, y ahí el centro funciona—; el cuerpo se alinea a la
+   izquierda y se le topa el ancho de lectura. */
+@media (max-width: 720px) {
+  .hero p,
+  .seccion-info p,
+  .seccion-app p {
+    text-align: left;
+    text-wrap: pretty;
+  }
+}
+.hero p,
+.seccion-info p,
+.seccion-app p { max-width: 68ch; }
+.hero p { margin-left: auto; margin-right: auto; }
+
+/* Los titulares respiran y no parten palabras a mitad. */
+.hero h1, .seccion-app h2, .seccion-info h2 {
+  text-wrap: balance;
+  letter-spacing: -.015em;
+}
+
+/* ---- El botón principal, con el mismo gesto que el catálogo -------- */
+.hero .boton, .hero a.boton, .boton-ampliar {
+  transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+}
+.hero .boton:hover, .hero a.boton:hover, .boton-ampliar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(18, 100, 147, .22);
+}
+.hero .boton:focus-visible, .boton-ampliar:focus-visible {
+  outline: 2px solid var(--azul, #126493);
+  outline-offset: 3px;
+}
+
+/* ---- Los distintivos: menos peso, más aire ------------------------- */
+.distintivo { transition: background .16s ease, color .16s ease; }
+
+/* ---- Las tarjetas numeradas de «Cómo se usa» ----------------------- */
+.seccion-info .marco,
+.seccion-app .marco { transition: box-shadow .18s ease, border-color .18s ease; }
+
+/* ---- El hero entra, una sola vez ----------------------------------
+   Un gesto y no cuatro: la página no es una presentación. Se anima el
+   bloque entero, no cada elemento por separado, porque escalonar aquí
+   retrasaría la lectura de lo único que hay que leer. */
+@keyframes entra-hero {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.hero { animation: entra-hero .4s ease both; }
+
+/* ---- La barra de arriba se despega al bajar ------------------------ */
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: saturate(140%) blur(6px);
+  background: rgba(255, 255, 255, .92);
+}
+
+/* ---- Foco visible en todo lo que se puede tocar con el teclado ----- */
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--azul, #126493);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero { animation: none; }
+  .hero .boton, .boton-ampliar, .distintivo, .marco { transition: none; }
+}
+</style>
+<!-- /RETOQUE -->
 </head>
 
 <body>
