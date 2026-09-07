@@ -248,6 +248,45 @@ def prueba_salen_los_dos_enlaces_de_ir():
            "y los dos botones tienen que decir a dónde llevan: %s" % rotulos)
 
 
+def prueba_las_coordenadas_se_copian_de_un_toque():
+    """Antes iban en un `st.caption` entre acentos graves: se leían bien y no
+    se podían copiar de un toque, porque el código en línea de Streamlit no
+    trae botón. En un teléfono eso es mantener pulsado y arrastrar sobre dos
+    números de ocho decimales, de pie y con sol. `st.code` sí lo trae.
+    """
+    prueba = arrancar(respuesta={"aprobadas": CASOS["aprobada_simple"]}).run()
+    campo(prueba, "Número posicional").set_value("999999000001")
+    boton(prueba, "Buscar").click().run()
+
+    # La `key` del contenedor lleva el número de la ficha, y esto es lo que lo
+    # exige: una consulta puede devolver varias parcelas, y una `key` repetida
+    # revienta la página entera con `StreamlitDuplicateElementKey`. Pasó al
+    # escribir esta prueba, con la clave fija.
+    cierto(not prueba.exception,
+           "la página no revienta al pintar el bloque: %s" % prueba.exception)
+    bloques = [b.value for b in prueba.get("code")]
+    cierto(bloques, "las coordenadas van en un bloque copiable: %s"
+                    % (bloques or "ninguno"))
+    if not bloques:
+        return
+    # Se pegan tal cual en Google Maps o en un WhatsApp: dos grados decimales
+    # separados por coma y nada más. Un rótulo delante las inutilizaría, que es
+    # justo lo que este bloque existe para evitar.
+    partes = bloques[0].split(",")
+    cierto(len(partes) == 2, "y sólo el par, sin rótulos: %r" % bloques[0])
+    cierto(float(partes[1]) < 0,
+           "con la longitud negativa; sin el signo el inmueble cae en Arabia "
+           "Saudí y el mapa abre igual: %r" % bloques[0])
+    # A 390 px caben 26 caracteres en este bloque —medido en el navegador— y
+    # lo que sobra se corta por la derecha sin avisar. El par entero ronda los
+    # 25, así que entra justo: cualquier rótulo que se le añada delante lo
+    # partiría, y partido no se pega en ningún sitio.
+    largas = [l for l in bloques[0].splitlines() if len(l) > 26]
+    cierto(not largas,
+           "y ninguna línea pasa de 26 caracteres, que es lo que entra en un "
+           "teléfono: %s" % largas)
+
+
 def prueba_los_enlaces_llevan_la_longitud_negativa():
     """Sin el signo, el inmueble aparece en Arabia Saudí y el mapa abre igual."""
     import re

@@ -341,9 +341,21 @@ for numero, f in enumerate(fichas, 1):
                                enlace["url"], width="stretch",
                                type="primary", help=enlace["ayuda"])
 
+        # Antes esto era un `st.caption` con las coordenadas entre acentos
+        # graves. Se leía bien y **no se podía copiar de un toque**: el código
+        # en línea de Streamlit no trae botón, así que en un teléfono había que
+        # mantener pulsado y arrastrar sobre dos números de ocho decimales, de
+        # pie y con sol. `st.code` sí lo trae, visible sin hover — que es lo
+        # que importa donde no hay hover.
+        # La clave lleva el número de la ficha: una consulta puede devolver
+        # varias parcelas y `key` tiene que ser única en toda la página —
+        # repetirla revienta con `StreamlitDuplicateElementKey`. El CSS
+        # engancha por prefijo, con `[class*="st-key-campo"]`.
+        with st.container(key="campo_%d" % numero):
+            st.code(navegacion.coordenadas_para_pegar(f["lat"], f["lon"]),
+                    language=None)
         st.caption(
-            "Coordenadas para copiar y pegar en cualquier otra aplicación: "
-            "`%s`" % navegacion.coordenadas_para_pegar(f["lat"], f["lon"]))
+            "Las coordenadas, para pegarlas en cualquier otra aplicación.")
 
     # ------------------------------------------------------------- la ficha --
 

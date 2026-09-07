@@ -292,6 +292,23 @@ CSS = f"""
   iframe {{ max-width: 100%; }}
 
   /* Sin páginas que listar, la barra lateral solo ocupa espacio. */
+  /* El bloque de campo. Se lee de pie, con sol y a un brazo de distancia, así
+     que va más grande que el texto normal — y más todavía en el teléfono, que
+     es donde se usa de verdad. El botón de copiar lo pone Streamlit.
+
+     Va acotado con `st.container(key="campo")`, que Streamlit publica en el
+     DOM como `st-key-campo…` y es el único gancho que su documentación da por
+     estable. Sin acotarlo también crecería el bloque del «Detalle técnico» de
+     un error, que se lee sentado y no de pie. */
+  .stApp [class*="st-key-campo"] div[data-testid="stCode"] pre code {{
+      font-size: 1.15rem; line-height: 1.85; letter-spacing: .01em;
+  }}
+  @media (max-width: 640px) {{
+    .stApp [class*="st-key-campo"] div[data-testid="stCode"] pre code {{
+        font-size: 1.3rem;
+    }}
+  }}
+
   section[data-testid="stSidebar"] {{ display: none; }}
 </style>
 """
