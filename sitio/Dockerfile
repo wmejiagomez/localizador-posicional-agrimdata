@@ -21,6 +21,9 @@ COPY assets /usr/share/nginx/html/assets
 # assets y nada más.
 COPY robots.txt /usr/share/nginx/html/robots.txt
 
+# Cabeceras de seguridad: sin esto nginx:alpine no manda ninguna.
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Una página estática no necesita nada más. El `healthcheck` va aquí y no en el
 # compose para que valga igual si algún día se levanta a mano.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
