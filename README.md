@@ -126,3 +126,34 @@ consulta en vivo en sus geoservicios públicos (`atlas.ri.gob.do`); los derechos
 sobre esa información son suyos. La foto aérea la sirve **Esri** y el callejero
 **CARTO**, con datos de **OpenStreetMap**. Google Maps y Waze son marcas de sus
 respectivos titulares y no están asociadas a este producto.
+
+---
+
+### 📋 1. ¿Qué es?
+
+- Aplicación Streamlit (`app.py`) gratuita del hub de herramientas: recibe un número posicional del Registro Inmobiliario y devuelve dónde queda el inmueble.
+- Público: el dueño de un inmueble con un papel y un número, no el agrimensor (docstring de `app.py`).
+- Vitrina estática en `sitio/` (nginx, contenedor propio) y aplicación en `localizador.app.agrimensura.com.do`.
+
+### ⚙️ 2. ¿Cómo lo hace?
+
+- `nucleo/ri.py` consulta en vivo el GeoServer público del RI (`atlas.ri.gob.do`) por WFS en tres capas —`aprobadas`, `previo2017`, `anuladas`— **en paralelo**, porque pedirlas en una sola petición devuelve HTTP 500.
+- `nucleo/inmueble.py` convierte la respuesta en ficha; `nucleo/centroide.py` calcula el centroide, comprueba que cae dentro y, si no, lo sustituye por un punto interior garantizado.
+- `nucleo/coordenadas.py` (pyproj) pasa de UTM 19N a grados; `nucleo/mapa.py` pinta el punto con folium; `nucleo/navegacion.py` arma los enlaces de Google Maps y Waze.
+- El resultado se guarda en `st.session_state` para no volver a consultar al RI en cada reejecución.
+
+```mermaid
+flowchart LR
+  A[Posicional] --> B[ri.py: 3 capas WFS en paralelo]
+  B --> C[inmueble.py: ficha]
+  C --> D[centroide.py: punto dentro]
+  D --> E[mapa.py + navegacion.py]
+```
+
+### 🚫 4. ¿Qué NO hace?
+
+- No entrega archivos: ni DXF, ni KML, ni shapefile, ni CSV; `ezdxf` y `pyshp` quedan fuera de `requirements.txt` a propósito y `test_privacidad.py` lo vigila.
+- No busca por designación catastral ni por expediente, no admite listas ni lotes y no recorre números: una búsqueda por acción pedida.
+- No dice quién es el propietario, no traza linderos y no comprueba cargas ni gravámenes.
+- No es el Registro Inmobiliario ni certifica nada; el punto es para llegar, no para medir.
+- No cachea el parcelario.
