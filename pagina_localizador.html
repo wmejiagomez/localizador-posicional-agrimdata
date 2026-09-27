@@ -669,7 +669,9 @@ a:focus-visible, button:focus-visible {
   // catalogo, que suma las visitas de todas las herramientas.
   //
   // Si el servicio no responde, no pasa nada: la pagina funciona igual.
-  fetch('https://countapi.mileshilliard.com/api/v1/hit/agrimensura-localizador-pagevisits').catch(() => {});
+  // AGRIM_SIN_CONTADOR: fuera de *.agrimensura.com.do (disco, localhost, copias de prueba)
+  // no se suma: antes las pruebas subían la cifra pública de visitas.
+  if (/(^|\.)agrimensura\.com\.do$/.test(location.hostname)) fetch('https://countapi.mileshilliard.com/api/v1/hit/agrimensura-localizador-pagevisits').catch(() => {});
 </script>
 
 <script>
