@@ -42,6 +42,7 @@ def main():
     for archivo, que_cubre in SUITES:
         print("\n=== %s · %s" % (archivo, que_cubre))
         hecho = subprocess.run([sys.executable, os.path.join(AQUI, archivo)],
+                               env=dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1"),
                                capture_output=True, text=True,
                                encoding="utf-8", errors="replace")
         # El aviso de Streamlit sobre el ScriptRunContext sale en cada `run()` de
