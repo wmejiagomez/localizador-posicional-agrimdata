@@ -157,3 +157,11 @@ flowchart LR
 - No dice quién es el propietario, no traza linderos y no comprueba cargas ni gravámenes.
 - No es el Registro Inmobiliario ni certifica nada; el punto es para llegar, no para medir.
 - No cachea el parcelario.
+
+## Límites de entrada (09/10/2026)
+
+`convertir_utm` rechaza con `ErrorCoordenada` un Este o un Norte fuera de 0–10 000 000 o cualquier valor
+no finito (`inf`, `nan`). `geo_a_utm` rechaza una longitud fuera de −180..180, una latitud fuera de −90..90 o un valor no
+finito. Las cotas son holgadas a propósito (el Este real de la zona 19 anda por 166 000–834 000, y la herramienta avisa, sin bloquear, cuando Este y Norte vienen intercambiados): solo atrapan lo imposible,
+como el Este de 1e12 que tumbó la página el 06/10/2026. No validan que el punto caiga en el país; de eso se ocupa `fuera_del_pais`.
+Prueba: sección 9 de `pruebas/test_coordenadas.py`.

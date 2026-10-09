@@ -186,7 +186,18 @@ def a_dms(valor, es_latitud, decimales=5):
 
 # --- Conversion --------------------------------------------------------------
 
+# Cotas de seguridad, holgadas a proposito (el Este real de la zona 19 anda por 166 000-834 000, y Este y Norte pueden venir intercambiados: se avisa, no se bloquea): solo atrapan lo imposible.
+LIMITES_UTM = {"este_min": 0.0, "este_max": 10000000.0, "norte_min": 0.0, "norte_max": 10000000.0}
+LIMITES_GEO = {"lon_min": -180.0, "lon_max": 180.0, "lat_min": -90.0, "lat_max": 90.0}
+
+
 def geo_a_utm(lon, lat, zona=19):
+    # Cota de seguridad (09/10/2026): longitud/latitud fuera de rango o no finitas no son un punto; antes pyproj
+    # devolvia infinito o un punto absurdo sin avisar.
+    if not (math.isfinite(lon) and math.isfinite(lat)
+            and LIMITES_GEO["lon_min"] <= lon <= LIMITES_GEO["lon_max"]
+            and LIMITES_GEO["lat_min"] <= lat <= LIMITES_GEO["lat_max"]):
+        raise ErrorCoordenada("Longitud/latitud imposibles: %s, %s" % (lon, lat))
     return _tr(zona, True).transform(lon, lat)
 
 
@@ -234,7 +245,12 @@ def convertir(lat, lon, zona=ZONA_PAIS, nombre=None):
 
 
 def convertir_utm(este, norte, zona=ZONA_PAIS, nombre=None):
-    """Un punto en UTM -> todas sus representaciones."""
+    """Un punto en UTM -> todas sus representaciones. Lanza ErrorCoordenada si Este/Norte salen de LIMITES_UTM o no son finitos."""
+    if not (math.isfinite(este) and math.isfinite(norte)
+            and LIMITES_UTM["este_min"] <= este <= LIMITES_UTM["este_max"]
+            and LIMITES_UTM["norte_min"] <= norte <= LIMITES_UTM["norte_max"]):
+        raise ErrorCoordenada(
+            "Este/Norte imposibles para la zona %s: %s, %s" % (zona, este, norte))
     lon, lat = utm_a_geo(este, norte, zona)
     # Un Este o un Norte imposibles (1e12, o con ceros de mas) hacen que pyproj
     # devuelva infinito, y a_dms reventaba con OverflowError: la pagina entera
