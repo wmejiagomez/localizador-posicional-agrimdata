@@ -11,6 +11,7 @@ todo el mundo. El error no da excepcion: da coordenadas plausibles en otro
 continente.
 """
 
+import math
 import re
 import pyproj
 
@@ -235,6 +236,12 @@ def convertir(lat, lon, zona=ZONA_PAIS, nombre=None):
 def convertir_utm(este, norte, zona=ZONA_PAIS, nombre=None):
     """Un punto en UTM -> todas sus representaciones."""
     lon, lat = utm_a_geo(este, norte, zona)
+    # Un Este o un Norte imposibles (1e12, o con ceros de mas) hacen que pyproj
+    # devuelva infinito, y a_dms reventaba con OverflowError: la pagina entera
+    # caia con una traza en vez de marcar la fila (coordenadas-app, 2026-10-06).
+    if not (math.isfinite(lat) and math.isfinite(lon)):
+        raise ErrorCoordenada(
+            "Este/Norte imposibles para la zona %s: %s, %s" % (zona, este, norte))
     d = convertir(lat, lon, zona, nombre)
     # Se devuelven el Este y el Norte que escribio el usuario, no los que
     # resultan de convertir y volver: reimprimir 278098.72299 donde el escribio
