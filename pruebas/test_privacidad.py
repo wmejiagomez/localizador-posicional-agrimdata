@@ -56,9 +56,10 @@ def fuentes():
     """
     encontrados = []
     for carpeta, subcarpetas, archivos in os.walk(RAIZ):
-        subcarpetas[:] = [s for s in subcarpetas
-                          if s not in ("pruebas", "__pycache__", ".git",
-                                       "venv", ".venv")]
+        # `.claude/` (receta run-* y ajustes de desarrollo) solo se deja fuera del escaneo si el `.dockerignore` lo
+        # saca de la imagen: si viajara, su driver, que escribe un log en disco, estaria en produccion (09/10/2026).
+        excluidas = ("pruebas", "__pycache__", ".git", "venv", ".venv") + ((".claude",) if CLAUDE_FUERA else ())
+        subcarpetas[:] = [s for s in subcarpetas if s not in excluidas]
         for archivo in archivos:
             if archivo.endswith(".py"):
                 encontrados.append(os.path.join(carpeta, archivo))
@@ -70,11 +71,21 @@ def leer(ruta):
         return f.read()
 
 
+def dockerignore_lista_claude():
+    ruta = os.path.join(RAIZ, ".dockerignore")
+    if not os.path.exists(ruta):
+        return False
+    return any(l.strip().strip("/") == ".claude" for l in leer(ruta).splitlines())
+
+
+CLAUDE_FUERA = dockerignore_lista_claude()
 FUENTES = fuentes()
 
 print("=" * 72)
 print("LOS ARCHIVOS QUE SE INSPECCIONAN EXISTEN")
 print("=" * 72)
+
+verificar(CLAUDE_FUERA, ".claude no viaja en la imagen: el .dockerignore lo lista")
 
 # Si esta lista se queda corta, todo lo de abajo pasa sin mirar nada.
 verificar(len(FUENTES) >= 10,
