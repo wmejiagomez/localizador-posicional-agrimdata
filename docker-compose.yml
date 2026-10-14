@@ -17,6 +17,12 @@ services:
     image: localizador-app:local
     container_name: localizador-app
     restart: unless-stopped
+    # C-20261014-AGR-02: el HEALTHCHECK del Dockerfile corre cada 30 s y, sumado a
+    # ~34 apps, cuesta ~1,1-1,35 de 4 nucleos del VPS. Solo se sube el intervalo;
+    # test, timeout, start-period y retries se heredan de la imagen. Para volver
+    # atras: quitar este bloque y recrear.
+    healthcheck:
+      interval: 120s
     networks:
       - coolify
     labels:
